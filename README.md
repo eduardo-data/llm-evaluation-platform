@@ -51,7 +51,7 @@ Uses sentence embeddings to compare semantic meaning rather than exact wording. 
 Clone repository:
 
 ```
-git clone <your-repo-url>
+git clone <https://github.com/eduardo-data/llm-evaluation-platform.git>
 cd llm-eval-docker
 ```
 
