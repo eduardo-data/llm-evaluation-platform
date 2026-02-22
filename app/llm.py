@@ -2,7 +2,7 @@ import os
 import requests
 
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://ollama:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "mistral")
 
 def ask_llm(prompt: str) -> str:
     url = f"{OLLAMA_HOST}/api/generate"
