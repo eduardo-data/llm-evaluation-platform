@@ -1,55 +1,50 @@
 <!doctype html>
 <html lang="pt-br">
-  <head>
-    <meta charset="utf-8" />
-    <title>LLM Eval (Ollama + Métricas)</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      body { font-family: system-ui, Arial; margin: 24px; max-width: 900px; }
-      input, textarea { width: 100%; padding: 10px; margin-top: 6px; }
-      label { font-weight: 600; }
-      button { padding: 10px 16px; margin-top: 12px; cursor: pointer; }
-      .card { padding: 16px; border: 1px solid #ddd; border-radius: 10px; margin-top: 16px; }
-      pre { white-space: pre-wrap; }
-      .muted { color: #666; font-size: 0.95rem; }
-    </style>
-  </head>
-  <body>
-    <h2>LLM Evaluation (Ollama)</h2>
-    <p class="muted">
-      Digite uma pergunta. Se você preencher a “resposta referência”, o app calcula BLEU, ROUGE-L e Similaridade.
-    </p>
+<head>
+  <meta charset="utf-8"/>
+  <title>Dashboard - LLM Eval</title>
+  <style>
+    body{font-family:system-ui,Arial;margin:24px;max-width:1100px}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{border:1px solid #ddd;padding:10px;vertical-align:top}
+    th{background:#f6f6f6;text-align:left}
+    .muted{color:#666}
+  </style>
+</head>
+<body>
+  <h2>Dashboard</h2>
+  <p class="muted">Médias agregadas por modelo e tipo de prompt.</p>
 
-    <form method="post">
-      <label>Pergunta</label>
-      <textarea name="question" rows="3" placeholder="Ex: Qual é a capital do Brasil?">{{ result.question if result else "" }}</textarea>
+  <table>
+    <thead>
+      <tr>
+        <th>Model</th><th>Prompt</th><th>N</th><th>Avg Latency</th>
+        <th>BLEU</th><th>ROUGE-L</th><th>Sim</th><th>Rel</th><th>Coh</th><th>Human Correct</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in stats %}
+      <tr>
+        <td>{{r[0]}}</td><td>{{r[1]}}</td><td>{{r[2]}}</td><td>{{"%.3f"|format(r[3] or 0)}}</td>
+        <td>{{"%.3f"|format(r[4] or 0)}}</td><td>{{"%.3f"|format(r[5] or 0)}}</td><td>{{"%.3f"|format(r[6] or 0)}}</td>
+        <td>{{"%.3f"|format(r[7] or 0)}}</td><td>{{"%.3f"|format(r[8] or 0)}}</td><td>{{"%.3f"|format(r[9] or 0)}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
-      <label>Resposta referência (opcional)</label>
-      <textarea name="reference" rows="2" placeholder="Ex: A capital do Brasil é Brasília.">{{ result.reference if result else "" }}</textarea>
+  <h3>Recent runs</h3>
+  <table>
+    <thead><tr><th>When</th><th>Model</th><th>Prompt</th><th>Latency</th><th>Rel</th><th>Coh</th><th>Human Correct</th></tr></thead>
+    <tbody>
+      {% for r in recent %}
+      <tr>
+        <td>{{r[0]}}</td><td>{{r[1]}}</td><td>{{r[2]}}</td><td>{{"%.3f"|format(r[3] or 0)}}</td>
+        <td>{{"%.3f"|format(r[4] or 0)}}</td><td>{{"%.3f"|format(r[5] or 0)}}</td><td>{{r[6]}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
-      <button type="submit">Enviar</button>
-    </form>
-
-    {% if result %}
-      <div class="card">
-        {% if result.error %}
-          <b>Erro:</b> {{ result.error }}
-        {% else %}
-          <h3>Resposta do modelo</h3>
-          <pre>{{ result.response }}</pre>
-
-          {% if result.metrics %}
-            <h3>Métricas</h3>
-            <ul>
-              <li><b>BLEU</b>: {{ result.metrics.bleu }}</li>
-              <li><b>ROUGE-L</b>: {{ result.metrics.rougeL }}</li>
-              <li><b>Similaridade (cosseno)</b>: {{ result.metrics.similarity }}</li>
-            </ul>
-          {% else %}
-            <p class="muted">Sem métricas: preencha uma “resposta referência” para calcular.</p>
-          {% endif %}
-        {% endif %}
-      </div>
-    {% endif %}
-  </body>
+</body>
 </html>
