@@ -144,4 +144,8 @@ Modern AI systems require automated evaluation pipelines to validate output qual
 
 ## Author
 
-Luiz Eduardo
+Luiz Eduardo  
+Data Scientist  
+
+LinkedIn: https://www.linkedin.com/in/luizeduardodatascientist/
+GitHub: https://github.com/eduardo-data
