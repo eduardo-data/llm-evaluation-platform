@@ -25,26 +25,15 @@ def semantic_similarity(a: str, b: str) -> float:
     e2 = _embedder.encode(b)
     return float(cosine_similarity([e1], [e2])[0][0])
 
-# ---- "métricas de curadoria" (heurísticas práticas) ----
-
 def precision_semantic(reference: str, candidate: str) -> float:
-    # proxy: quão próximo semanticamente da resposta esperada
     if not reference.strip():
         return 0.0
     return semantic_similarity(reference, candidate)
 
 def relevance(question: str, candidate: str) -> float:
-    # proxy: se o texto responde ao tema/pergunta
     return semantic_similarity(question, candidate)
 
 def coherence(candidate: str) -> float:
-    """
-    Heurística simples:
-    - penaliza respostas muito curtas
-    - penaliza muitos caracteres não textuais
-    - bônus se há estrutura mínima (pontuação/ frases)
-    Isso NÃO prova verdade/fato; é um sinal de qualidade textual.
-    """
     text = candidate.strip()
     if len(text) < 20:
         return 0.2
@@ -55,7 +44,7 @@ def coherence(candidate: str) -> float:
     return max(0.0, min(1.0, score))
 
 def calculate_all(question: str, reference: str, candidate: str) -> dict:
-    out = {
+    return {
         "bleu": round(bleu(reference, candidate), 4) if reference else None,
         "rougeL": round(rouge_l(reference, candidate), 4) if reference else None,
         "similarity": round(semantic_similarity(reference, candidate), 4) if reference else None,
@@ -63,4 +52,3 @@ def calculate_all(question: str, reference: str, candidate: str) -> dict:
         "relevance": round(relevance(question, candidate), 4),
         "coherence": round(coherence(candidate), 4),
     }
-    return out

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <title>Dashboard - LLM Eval</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+    body{font-family:system-ui,Arial;margin:24px;max-width:1100px}
+    .nav a{margin-right:12px}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{border:1px solid #ddd;padding:10px;vertical-align:top}
+    th{background:#f6f6f6;text-align:left}
+    .muted{color:#666}
+  </style>
+</head>
+<body>
+
+  <div class="nav">
+    <a href="/">Home</a>
+    <a href="/dashboard">Dashboard</a>
+  </div>
+
+  <h2>Dashboard</h2>
+  <p class="muted">Médias agregadas por modelo e tipo de prompt (inclui % de uso de RAG).</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Model</th>
+        <th>Prompt</th>
+        <th>N</th>
+        <th>Avg Latency</th>
+        <th>BLEU</th>
+        <th>ROUGE-L</th>
+        <th>Sim</th>
+        <th>Rel</th>
+        <th>Coh</th>
+        <th>Human Correct</th>
+        <th>RAG Used (avg)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in stats %}
+      <tr>
+        <td>{{r[0]}}</td>
+        <td>{{r[1]}}</td>
+        <td>{{r[2]}}</td>
+        <td>{{"%.3f"|format(r[3] or 0)}}</td>
+        <td>{{"%.3f"|format(r[4] or 0)}}</td>
+        <td>{{"%.3f"|format(r[5] or 0)}}</td>
+        <td>{{"%.3f"|format(r[6] or 0)}}</td>
+        <td>{{"%.3f"|format(r[7] or 0)}}</td>
+        <td>{{"%.3f"|format(r[8] or 0)}}</td>
+        <td>{{"%.3f"|format(r[9] or 0)}}</td>
+        <td>{{"%.3f"|format(r[10] or 0)}}</td>
+      </tr>
+      {% endfor %}
+      {% if stats|length == 0 %}
+      <tr>
+        <td colspan="11" class="muted">Sem dados ainda. Faça alguns testes na Home (/) para popular o dashboard.</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+
+  <h3>Recent runs</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>When</th>
+        <th>Model</th>
+        <th>Prompt</th>
+        <th>Latency</th>
+        <th>Rel</th>
+        <th>Coh</th>
+        <th>Human Correct</th>
+        <th>RAG</th>
+        <th>Top Docs</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in recent %}
+      <tr>
+        <td>{{r[0]}}</td>
+        <td>{{r[1]}}</td>
+        <td>{{r[2]}}</td>
+        <td>{{"%.3f"|format(r[3] or 0)}}</td>
+        <td>{{"%.3f"|format(r[4] or 0)}}</td>
+        <td>{{"%.3f"|format(r[5] or 0)}}</td>
+        <td>{{r[6]}}</td>
+        <td>{{r[7]}}</td>
+        <td>{{r[8]}}</td>
+      </tr>
+      {% endfor %}
+      {% if recent|length == 0 %}
+      <tr>
+        <td colspan="9" class="muted">Sem execuções recentes.</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+
+</body>
+</html>

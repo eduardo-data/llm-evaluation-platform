@@ -2,49 +2,112 @@
 <html lang="pt-br">
 <head>
   <meta charset="utf-8"/>
-  <title>Dashboard - LLM Eval</title>
+  <title>LLM Evaluation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <style>
     body{font-family:system-ui,Arial;margin:24px;max-width:1100px}
+    textarea,select{width:100%;padding:10px;margin-top:6px}
+    label{font-weight:600;display:block;margin-top:12px}
+    button{padding:10px 16px;margin-top:16px;cursor:pointer}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .card{border:1px solid #ddd;border-radius:10px;padding:16px;margin-top:16px}
     table{width:100%;border-collapse:collapse;margin-top:12px}
     th,td{border:1px solid #ddd;padding:10px;vertical-align:top}
     th{background:#f6f6f6;text-align:left}
+    pre{white-space:pre-wrap;margin:0}
+    .nav a{margin-right:12px}
     .muted{color:#666}
+    .pill{display:inline-block;padding:2px 8px;border:1px solid #ddd;border-radius:999px;margin-left:8px;font-size:12px}
   </style>
 </head>
 <body>
-  <h2>Dashboard</h2>
-  <p class="muted">Médias agregadas por modelo e tipo de prompt.</p>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Model</th><th>Prompt</th><th>N</th><th>Avg Latency</th>
-        <th>BLEU</th><th>ROUGE-L</th><th>Sim</th><th>Rel</th><th>Coh</th><th>Human Correct</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for r in stats %}
-      <tr>
-        <td>{{r[0]}}</td><td>{{r[1]}}</td><td>{{r[2]}}</td><td>{{"%.3f"|format(r[3] or 0)}}</td>
-        <td>{{"%.3f"|format(r[4] or 0)}}</td><td>{{"%.3f"|format(r[5] or 0)}}</td><td>{{"%.3f"|format(r[6] or 0)}}</td>
-        <td>{{"%.3f"|format(r[7] or 0)}}</td><td>{{"%.3f"|format(r[8] or 0)}}</td><td>{{"%.3f"|format(r[9] or 0)}}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="nav">
+    <a href="/">Home</a>
+    <a href="/dashboard">Dashboard</a>
+  </div>
 
-  <h3>Recent runs</h3>
-  <table>
-    <thead><tr><th>When</th><th>Model</th><th>Prompt</th><th>Latency</th><th>Rel</th><th>Coh</th><th>Human Correct</th></tr></thead>
-    <tbody>
-      {% for r in recent %}
-      <tr>
-        <td>{{r[0]}}</td><td>{{r[1]}}</td><td>{{r[2]}}</td><td>{{"%.3f"|format(r[3] or 0)}}</td>
-        <td>{{"%.3f"|format(r[4] or 0)}}</td><td>{{"%.3f"|format(r[5] or 0)}}</td><td>{{r[6]}}</td>
-      </tr>
+  <h2>LLM Evaluation (V3) <span class="pill">RAG opcional</span></h2>
+  <p class="muted">Compare dois modelos, calcule métricas e registre avaliação humana (opcional).</p>
+
+  <form method="post">
+    <label>Pergunta</label>
+    <textarea name="question" rows="3" placeholder="Ex: Qual é a capital de Pernambuco?">{{ result.question if result else "" }}</textarea>
+
+    <label>Resposta referência (opcional)</label>
+    <textarea name="reference" rows="2" placeholder="Ex: A capital de Pernambuco é Recife.">{{ result.reference if result else "" }}</textarea>
+
+    <div class="row">
+      <div>
+        <label>Modelo A</label>
+        <select name="model_a">
+          {% for m in models %}
+            <option value="{{m}}" {% if result and result.models[0].name == m %}selected{% endif %}>{{m}}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label>Modelo B</label>
+        <select name="model_b">
+          {% for m in models %}
+            <option value="{{m}}" {% if result and result.models[1].name == m %}selected{% endif %}>{{m}}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <label>Prompt template</label>
+    <select name="prompt_key">
+      {% for k, cfg in prompts.items() %}
+        <option value="{{k}}" {% if result and result.prompt_key == k %}selected{% endif %}>{{cfg.name}}</option>
       {% endfor %}
-    </tbody>
-  </table>
+    </select>
+
+    <label><input type="checkbox" name="use_rag" {% if result and result.use_rag %}checked{% endif %}> Usar RAG (buscar contexto na base local)</label>
+
+    <label>Avaliação humana (opcional)</label>
+    <div>
+      <label><input type="checkbox" name="human_correct"> Correct / Precisa</label>
+      <label><input type="checkbox" name="human_relevant"> Relevante</label>
+      <label><input type="checkbox" name="human_coherent"> Coerente</label>
+    </div>
+
+    <button type="submit">Comparar</button>
+  </form>
+
+  {% if result %}
+    <div class="card">
+      <h3>Resultados</h3>
+
+      {% if result.use_rag %}
+        <p class="muted"><b>RAG:</b> ligado | <b>Top docs:</b> {{result.rag_top_ids}}</p>
+      {% endif %}
+
+      <table>
+        <thead>
+          <tr>
+            <th>Modelo</th>
+            <th>Resposta</th>
+            <th>Latência (s)</th>
+            <th>Métricas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in result.models %}
+            <tr>
+              <td><b>{{m.name}}</b></td>
+              <td><pre>{{m.response}}</pre></td>
+              <td>{{m.latency_s}}</td>
+              <td><pre>{{m.metrics}}</pre></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <p class="muted">Esses resultados foram salvos e aparecem no Dashboard.</p>
+    </div>
+  {% endif %}
 
 </body>
 </html>

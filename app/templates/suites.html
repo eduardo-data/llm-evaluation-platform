@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <title>Test Suites</title>
+  <style>
+    body{font-family:system-ui,Arial;margin:24px;max-width:1100px}
+    .card{border:1px solid #ddd;border-radius:10px;padding:16px;margin-top:16px}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{border:1px solid #ddd;padding:10px;vertical-align:top}
+    th{background:#f6f6f6;text-align:left}
+    pre{white-space:pre-wrap}
+  </style>
+</head>
+<body>
+
+<h2>Conversation Test Suites</h2>
+
+<div class="card">
+  <form method="post" action="/suites/run">
+    <label>Suite</label><br/>
+    <select name="suite_id">
+      {% for s in suites %}
+        <option value="{{s.id}}">{{s.name}}</option>
+      {% endfor %}
+    </select><br/><br/>
+
+    <label>Model</label><br/>
+    <input name="model" placeholder="mistral" value="mistral"/><br/><br/>
+
+    <label>Prompt key</label><br/>
+    <input name="prompt_key" placeholder="direct" value="direct"/><br/><br/>
+
+    <button type="submit">Run suite</button>
+  </form>
+</div>
+
+{% if run_result %}
+  <div class="card">
+    <h3>Run Result</h3>
+    <p><b>Suite:</b> {{run_result.suite_name}} | <b>Model:</b> {{run_result.model}} | <b>Prompt:</b> {{run_result.prompt_key}}</p>
+    <p><b>Aggregates:</b></p>
+    <pre>{{run_result.aggregates}}</pre>
+
+    <h4>Turns</h4>
+    <table>
+      <thead>
+        <tr><th>#</th><th>User</th><th>Response</th><th>Latency</th><th>Metrics</th></tr>
+      </thead>
+      <tbody>
+        {% for t in run_result.turn_results %}
+          <tr>
+            <td>{{t.turn_index}}</td>
+            <td><pre>{{t.user}}</pre></td>
+            <td><pre>{{t.response}}</pre></td>
+            <td>{{"%.3f"|format(t.latency_s)}}</td>
+            <td><pre>{{t.metrics}}</pre></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+
+</body>
+</html>

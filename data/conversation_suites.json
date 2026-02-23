@@ -1,0 +1,36 @@
+[
+  {
+    "id": "suite_geography_pt",
+    "name": "Geografia (PT-BR) - multi-turn",
+    "description": "Perguntas simples com follow-up para testar consistência e contexto.",
+    "turns": [
+      {
+        "user": "Qual é a capital de Pernambuco?",
+        "reference": "A capital de Pernambuco é Recife."
+      },
+      {
+        "user": "E qual é a capital do Brasil?",
+        "reference": "A capital do Brasil é Brasília."
+      },
+      {
+        "user": "Qual dessas duas capitais fica no Nordeste?",
+        "reference": "Recife fica no Nordeste."
+      }
+    ]
+  },
+  {
+    "id": "suite_finance_pt",
+    "name": "Finanças (PT-BR) - respostas curtas e seguras",
+    "description": "Testa relevância, prudência e clareza.",
+    "turns": [
+      {
+        "user": "Explique o que é inflação em uma frase.",
+        "reference": "Inflação é o aumento generalizado e contínuo dos preços ao longo do tempo."
+      },
+      {
+        "user": "Dê um exemplo simples do impacto da inflação no dia a dia.",
+        "reference": "Com inflação, o mesmo dinheiro compra menos produtos, como alimentos e transporte."
+      }
+    ]
+  }
+]

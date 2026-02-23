@@ -1,41 +1,135 @@
 ![demo](docs/demo.gif)
+
 # LLM Evaluation Platform (Local LLM + Metrics)
 
-This project implements a complete evaluation pipeline for Large Language Models running locally using Ollama. It provides a web interface where users can submit prompts, receive model responses, and evaluate output quality using multiple NLP metrics.
+This project implements a complete evaluation and benchmarking pipeline for Large Language Models running locally using Ollama. It provides a web interface where users can submit prompts, receive model responses, compare outputs, and evaluate quality using multiple NLP metrics.
 
 ---
 
 ## Overview
 
-The system runs a local LLM instance, sends prompts through a Flask API, and evaluates the generated output using standard NLP metrics. It simulates a real-world AI evaluation workflow used in production environments.
+The system runs local LLMs, sends prompts through a Flask API, evaluates generated outputs, logs results, and displays metrics in real time.
+
+It simulates real-world AI validation workflows used in production environments.
 
 Architecture flow:
 
-Browser → Flask App → Ollama API → Local LLM → Metrics Engine → Results UI
+Browser → Flask App → Ollama API → Local LLM → Metrics Engine → Storage → Dashboard UI
 
 ---
 
-## Features
+## Core Features
 
-- Local LLM execution (no external API required)
-- Interactive web interface for prompt testing
+- Local LLM execution (no external APIs required)
+- Multi-model comparison (A/B testing)
 - Automated evaluation metrics
+- Prompt template system
+- Conversation test suites (multi-turn testing)
+- Evaluation logging + monitoring
 - Fully containerized environment
 - Reproducible setup using Docker
-- Realistic AI evaluation pipeline
+
+---
+
+# Version 2.0 — Model Comparison Mode
+
+Version 2 introduced a benchmarking mode that allows comparing two local LLMs simultaneously and evaluating responses side by side.
+
+### Capabilities
+
+- Run multiple models in parallel
+- Compare responses visually
+- Measure response latency per model
+- Calculate metrics per output
+- Structured comparison table
+
+---
+
+### How It Works
+
+Instead of sending a prompt to a single model, the system:
+
+1. Sends the same prompt to Model A and Model B
+2. Collects both responses independently
+3. Measures latency
+4. Calculates evaluation metrics
+5. Displays comparison results
+
+This simulates real-world model benchmarking pipelines used in production AI systems.
+
+---
+
+### Example Output
+
+| Model | Latency | BLEU | ROUGE-L | Similarity |
+|------|--------|------|---------|------------|
+| mistral | 0.82s | 0.71 | 0.80 | 0.92 |
+| phi4-mini | 0.54s | 0.68 | 0.77 | 0.90 |
+
+---
+
+# Version 3.0 — Conversational Evaluation & Monitoring
+
+Version 3 expands the system into a complete evaluation platform with conversation test suites, logging, and monitoring.
+
+### New Capabilities
+
+- Multi-turn conversation testing
+- Regression testing for prompts/models
+- Automated suite execution
+- Aggregated metrics per test suite
+- SQLite experiment logging
+- Performance monitoring dashboard
+- Human evaluation signals (correctness, relevance, coherence)
+
+---
+
+### Why This Matters
+
+Production AI systems must be tested across realistic conversations, not isolated prompts.
+
+This version demonstrates experience with:
+
+- conversational testing
+- regression evaluation
+- monitoring pipelines
+- evaluation reproducibility
+
+---
+
+### Conversation Test Suites
+
+Suites simulate real chat interactions with sequential turns and expected answers.
+
+Each suite run produces:
+
+- response per turn
+- latency per turn
+- metrics per turn
+- aggregated metrics
+
+This mirrors testing pipelines used in real conversational AI deployments.
 
 ---
 
 ## Metrics Implemented
 
 ### BLEU
-Measures exact token overlap between generated output and reference text. Best suited for strict textual similarity tasks such as translation.
+Measures exact token overlap between generated output and reference text. Best suited for strict textual similarity tasks.
 
 ### ROUGE-L
-Measures the longest common subsequence between texts. Useful for evaluating content similarity and summarization tasks.
+Measures the longest common subsequence between texts. Useful for content similarity and summarization evaluation.
 
 ### Semantic Similarity (Cosine Similarity)
-Uses sentence embeddings to compare semantic meaning rather than exact wording. More suitable for modern LLM evaluation.
+Uses embeddings to compare semantic meaning rather than exact wording.
+
+### Additional Evaluation Signals
+
+- Precision (semantic correctness proxy)
+- Relevance (question–answer alignment)
+- Coherence (text quality heuristic)
+
+These approximate real evaluation signals used in LLM quality pipelines.
 
 ---
 
@@ -67,44 +161,41 @@ Start services:
 docker compose up -d
 ```
 
-Download model (first run only):
+Download models (first run only):
 
 ```
 docker exec -it ollama ollama pull mistral
+docker exec -it ollama ollama pull phi4-mini
 ```
 
 ---
 
 ## Usage
 
-Open your browser:
+Open:
 
 ```
 http://localhost:5000
 ```
 
-Input:
+Suite runner:
 
-- Prompt (required)
-- Reference answer (optional)
-
-The system returns:
-
-- Model response
-- BLEU score
-- ROUGE-L score
-- Semantic similarity score
+```
+http://localhost:5000/suites
+```
 
 ---
 
 ## Use Cases
 
-This project simulates real-world LLM validation pipelines used for:
+This project simulates real-world LLM validation workflows used for:
 
 - AI response quality analysis
 - Prompt engineering testing
 - Conversational AI evaluation
 - Model benchmarking
+- Regression testing
+- Monitoring model behavior
 - Retrieval-Augmented Generation validation
 
 ---
@@ -116,29 +207,50 @@ This project simulates real-world LLM validation pipelines used for:
 - Ollama
 - Sentence Transformers
 - Scikit-learn
+- SQLite
 - Docker
+
+---
+
+## Architecture Highlights
+
+This project demonstrates hands-on experience with:
+
+- local LLM orchestration
+- prompt engineering systems
+- evaluation pipelines
+- experiment logging
+- monitoring
+- A/B testing
+- conversational testing
+- reproducible environments
 
 ---
 
 ## Why This Project Matters
 
-Modern AI systems require automated evaluation pipelines to validate output quality and consistency. This project demonstrates practical experience with:
+Modern AI systems require automated pipelines to validate output quality, consistency, and reliability.
+
+This project demonstrates practical experience with:
 
 - running local LLMs
 - integrating model APIs
 - evaluating generated outputs
 - building testing pipelines
 - containerizing applications
+- benchmarking multiple models
+- monitoring model behavior
 
 ---
 
 ## Future Improvements
 
 - BERTScore metric
-- Multi-model comparison
-- Prompt A/B testing
-- Experiment tracking dashboard
-- Evaluation history logging
+- multi-model batch benchmarking
+- automated prompt optimization
+- experiment tracking UI
+- performance visualization charts
+- distributed evaluation workers
 
 ---
 
@@ -147,6 +259,5 @@ Modern AI systems require automated evaluation pipelines to validate output qual
 Luiz Eduardo  
 Data Scientist  
 
-LinkedIn: https://www.linkedin.com/in/luizeduardodatascientist/ 
-
+LinkedIn: https://www.linkedin.com/in/luizeduardodatascientist/  
 GitHub: https://github.com/eduardo-data

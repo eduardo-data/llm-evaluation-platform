@@ -21,12 +21,17 @@ def init_db():
             prompt_used TEXT,
             response TEXT,
             latency_s REAL,
+
+            rag_used INTEGER,
+            rag_top_ids TEXT,
+
             bleu REAL,
             rougeL REAL,
             similarity REAL,
             precision REAL,
             relevance REAL,
             coherence REAL,
+
             human_correct INTEGER,
             human_relevant INTEGER,
             human_coherent INTEGER
@@ -39,9 +44,10 @@ def log_run(payload: dict):
         con.execute("""
         INSERT INTO eval_runs (
             created_at, question, reference, model, prompt_name, prompt_used, response, latency_s,
+            rag_used, rag_top_ids,
             bleu, rougeL, similarity, precision, relevance, coherence,
             human_correct, human_relevant, human_coherent
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             datetime.utcnow().isoformat(),
             payload.get("question"),
@@ -51,15 +57,20 @@ def log_run(payload: dict):
             payload.get("prompt_used"),
             payload.get("response"),
             payload.get("latency_s"),
+
+            payload.get("rag_used", 0),
+            payload.get("rag_top_ids", ""),
+
             payload.get("bleu"),
             payload.get("rougeL"),
             payload.get("similarity"),
             payload.get("precision"),
             payload.get("relevance"),
             payload.get("coherence"),
-            payload.get("human_correct"),
-            payload.get("human_relevant"),
-            payload.get("human_coherent"),
+
+            payload.get("human_correct", 0),
+            payload.get("human_relevant", 0),
+            payload.get("human_coherent", 0),
         ))
         con.commit()
 
@@ -74,14 +85,15 @@ def get_dashboard_stats(limit: int = 200):
                AVG(COALESCE(similarity, 0)) as avg_similarity,
                AVG(COALESCE(relevance, 0)) as avg_relevance,
                AVG(COALESCE(coherence, 0)) as avg_coherence,
-               AVG(COALESCE(human_correct, 0)) as avg_human_correct
+               AVG(COALESCE(human_correct, 0)) as avg_human_correct,
+               AVG(COALESCE(rag_used, 0)) as avg_rag_used
         FROM eval_runs
         GROUP BY model, prompt_name
         ORDER BY n DESC
         """).fetchall()
 
         recent = con.execute("""
-        SELECT created_at, model, prompt_name, latency_s, relevance, coherence, human_correct
+        SELECT created_at, model, prompt_name, latency_s, relevance, coherence, human_correct, rag_used, rag_top_ids
         FROM eval_runs
         ORDER BY id DESC
         LIMIT ?

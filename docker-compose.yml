@@ -12,7 +12,8 @@ services:
     container_name: llm-eval-app
     environment:
       - OLLAMA_HOST=http://ollama:11434
-      - OLLAMA_MODEL=mistral
+      - EMB_MODEL_NAME=all-MiniLM-L6-v2
+      - DB_PATH=/app/data/evals.db
     ports:
       - "5000:5000"
     depends_on:
