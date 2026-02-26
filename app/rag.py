@@ -6,6 +6,8 @@ import os
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
+#! como melhoria quero add um 
+
 KB_PATH = Path("data/knowledge_base.json")
 
 EMB_MODEL_NAME = os.getenv("EMB_MODEL_NAME", "all-MiniLM-L6-v2")
@@ -22,7 +24,7 @@ def retrieve(query: str, top_k: int = 3) -> List[Dict[str, Any]]:
 
     scored = []
     for doc in kb:
-        d_emb = _embedder.encode(doc["text"])
+        d_emb = _embedder.encode(doc["text"])  #! preciso melhorar aqui para escalar, pois toda vez estou recalculando embeddings dos docs. O ideal seria pré-calcular e salvar junto na base de conhecimento
         score = float(cosine_similarity([q_emb], [d_emb])[0][0])
         scored.append({"id": doc["id"], "text": doc["text"], "score": score})
 
