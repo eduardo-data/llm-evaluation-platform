@@ -4,6 +4,10 @@ from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from rouge_score import rouge_scorer
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+from bert_score import score as bertscore
+
+
+BERTSCORE_MODEL = os.getenv("BERTSCORE_MODEL", "bert-base-multilingual-cased")
 
 EMB_MODEL_NAME = os.getenv("EMB_MODEL_NAME", "all-MiniLM-L6-v2")
 _embedder = SentenceTransformer(EMB_MODEL_NAME)
@@ -43,6 +47,17 @@ def coherence(candidate: str) -> float:
         score += 0.1
     return max(0.0, min(1.0, score))
 
+def bertscore_f1(reference: str, candidate: str) -> float:
+    # bert-score espera listas
+    P, R, F1 = bertscore(
+        [candidate],
+        [reference],
+        model_type=BERTSCORE_MODEL,
+        lang="pt",
+        verbose=False
+    )
+    return float(F1.mean().item())
+
 def calculate_all(question: str, reference: str, candidate: str) -> dict:
     return {
         "bleu": round(bleu(reference, candidate), 4) if reference else None,
@@ -51,4 +66,5 @@ def calculate_all(question: str, reference: str, candidate: str) -> dict:
         "precision": round(precision_semantic(reference, candidate), 4) if reference else None,
         "relevance": round(relevance(question, candidate), 4),
         "coherence": round(coherence(candidate), 4),
+        "bertscore_f1": round(bertscore_f1(reference, candidate), 4) if reference else None,
     }
